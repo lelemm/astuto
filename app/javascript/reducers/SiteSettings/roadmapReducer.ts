@@ -5,6 +5,13 @@ import {
   POSTSTATUS_UPDATE_FAILURE,
 } from '../../actions/PostStatus/updatePostStatus';
 
+import {
+  TenantUpdateActionTypes,
+  TENANT_UPDATE_START,
+  TENANT_UPDATE_SUCCESS,
+  TENANT_UPDATE_FAILURE,
+} from '../../actions/Tenant/updateTenant';
+
 export interface SiteSettingsRoadmapState {
   areUpdating: boolean;
   error: string;
@@ -17,7 +24,7 @@ const initialState = {
 
 const siteSettingsRoadmapReducer = (
   state = initialState,
-  action: PostStatusUpdateActionTypes,
+  action: PostStatusUpdateActionTypes | TenantUpdateActionTypes,
 ): SiteSettingsRoadmapState => {
   switch (action.type) {
     case POSTSTATUS_UPDATE_START:
@@ -34,6 +41,26 @@ const siteSettingsRoadmapReducer = (
       };
 
     case POSTSTATUS_UPDATE_FAILURE:
+      return {
+        ...state,
+        areUpdating: false,
+        error: action.error,
+      };
+
+    case TENANT_UPDATE_START:
+      return {
+        ...state,
+        areUpdating: true,
+      };
+
+    case TENANT_UPDATE_SUCCESS:
+      return {
+        ...state,
+        areUpdating: false,
+        error: '',
+      };
+
+    case TENANT_UPDATE_FAILURE:
       return {
         ...state,
         areUpdating: false,

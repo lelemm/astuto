@@ -96,7 +96,7 @@ class TenantsController < ApplicationController
     params[:tenant][:custom_domain] = nil if params[:tenant][:custom_domain].blank?
 
     if @tenant.update(tenant_update_params)
-      render json: @tenant
+      render json: @tenant.as_json(include: :tenant_setting)
     else
       render json: {
         error: @tenant.errors.full_messages

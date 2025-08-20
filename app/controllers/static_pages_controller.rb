@@ -50,7 +50,9 @@ class StaticPagesController < ApplicationController
 
       @posts = Post
         .find_with_post_status_in(@post_statuses)
-        .select(:id, :title, :board_id, :post_status_id, :user_id, :created_at)
+        .select(:id, :title, :description, :board_id, :post_status_id, :user_id, :created_at)
+
+      @tenant_setting = Current.tenant.tenant_setting
     end
 
     def allow_iframe_embedding

@@ -19,6 +19,8 @@ class TenantSettingPolicy < ApplicationPolicy
         :show_roadmap_in_header,
         :collapse_boards_in_header,
         :custom_css,
+        :roadmap_drag_and_drop_enabled,
+        :roadmap_feedback_content_display,
       ]
     else
       []

@@ -1,11 +1,16 @@
 <%=
   react_component(
-    'Roadmap',
+    'Roadmap/RoadmapRoot',
     {
       postStatuses: @post_statuses,
       posts: @posts,
       boards: @boards,
-      isEmbedded: @is_embedded
+      isEmbedded: @is_embedded,
+      authenticityToken: form_authenticity_token,
+      dragAndDropEnabled: @tenant_setting&.roadmap_drag_and_drop_enabled || false,
+      feedbackContentDisplay: (@tenant_setting ? @tenant_setting.read_attribute_before_type_cast(:roadmap_feedback_content_display) : 0),
+      isLoggedIn: user_signed_in?,
+      currentUserRole: user_signed_in? ? current_user.role : nil
     }
   )
 %>

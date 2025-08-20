@@ -16,6 +16,8 @@ interface Props {
   postStatuses: PostStatusesState,
   settingsAreUpdating: boolean,
   settingsError: string,
+  dragAndDropEnabled: boolean,
+  feedbackContentDisplay: number,
 
   requestPostStatuses(): void;
   updatePostStatus(
@@ -24,26 +26,47 @@ interface Props {
     onComplete: Function,
     authenticityToken: string,
   ): void;
+  updateRoadmapSettings(
+    dragAndDropEnabled: boolean,
+    feedbackContentDisplay: number,
+    onComplete: Function,
+    authenticityToken: string,
+  ): void;
 }
 
 interface State {
   isDragging: number;
+  localDragAndDropEnabled: boolean;
+  localFeedbackContentDisplay: number;
 }
 
 class RoadmapSiteSettingsP extends React.Component<Props, State> {
   constructor(props: Props) {
     super(props);
-
     this.state = {
       isDragging: null,
+      localDragAndDropEnabled: props.dragAndDropEnabled,
+      localFeedbackContentDisplay: props.feedbackContentDisplay,
     };
 
     this.handleDragStart = this.handleDragStart.bind(this);
     this.handleDragEnd = this.handleDragEnd.bind(this);
+    this.handleDragAndDropToggle = this.handleDragAndDropToggle.bind(this);
+    this.handleFeedbackContentDisplayChange = this.handleFeedbackContentDisplayChange.bind(this);
   }
 
   componentDidMount() {
     this.props.requestPostStatuses();
+  }
+
+  componentDidUpdate(prevProps: Props) {
+    // Update local state when props change (e.g., after successful backend update)
+    if (prevProps.dragAndDropEnabled !== this.props.dragAndDropEnabled) {
+      this.setState({ localDragAndDropEnabled: this.props.dragAndDropEnabled });
+    }
+    if (prevProps.feedbackContentDisplay !== this.props.feedbackContentDisplay) {
+      this.setState({ localFeedbackContentDisplay: this.props.feedbackContentDisplay });
+    }
   }
 
   handleDragStart(result) {
@@ -60,6 +83,36 @@ class RoadmapSiteSettingsP extends React.Component<Props, State> {
       result.draggableId,
       result.destination.droppableId === 'statusesInRoadmap',
       () => this.setState({ isDragging: null }),
+      this.props.authenticityToken,
+    );
+  }
+
+  handleDragAndDropToggle(enabled: boolean) {
+    this.setState({ localDragAndDropEnabled: enabled });
+    this.props.updateRoadmapSettings(
+      enabled,
+      this.props.feedbackContentDisplay,
+      (response: any) => {
+        // If the update was successful, reload the page to get fresh data
+        if (response && response.status === 200) {
+          window.location.reload();
+        }
+      },
+      this.props.authenticityToken,
+    );
+  }
+
+  handleFeedbackContentDisplayChange(value: number) {
+    this.setState({ localFeedbackContentDisplay: value });
+    this.props.updateRoadmapSettings(
+      this.props.dragAndDropEnabled,
+      value,
+      (response: any) => {
+        // If the update was successful, reload the page to get fresh data
+        if (response && response.status === 200) {
+          window.location.reload();
+        }
+      },
       this.props.authenticityToken,
     );
   }
@@ -85,7 +138,14 @@ class RoadmapSiteSettingsP extends React.Component<Props, State> {
   }
 
   render() {
-    const { embeddedRoadmapUrl, postStatuses, settingsAreUpdating, settingsError } = this.props;
+    const { 
+      embeddedRoadmapUrl, 
+      postStatuses, 
+      settingsAreUpdating, 
+      settingsError,
+      dragAndDropEnabled,
+      feedbackContentDisplay
+    } = this.props;
     const { isDragging } = this.state;
 
     let statusesInRoadmap = postStatuses.items.filter(postStatus => postStatus.showInRoadmap);
@@ -160,7 +220,13 @@ class RoadmapSiteSettingsP extends React.Component<Props, State> {
           </Droppable>
         </Box>
 
-        <RoadmapEmbedding embeddedRoadmapUrl={embeddedRoadmapUrl} />
+        <RoadmapEmbedding 
+          embeddedRoadmapUrl={embeddedRoadmapUrl}
+          dragAndDropEnabled={this.state.localDragAndDropEnabled}
+          feedbackContentDisplay={this.state.localFeedbackContentDisplay}
+          onDragAndDropToggle={this.handleDragAndDropToggle}
+          onFeedbackContentDisplayChange={this.handleFeedbackContentDisplayChange}
+        />
 
         <SiteSettingsInfoBox areUpdating={settingsAreUpdating || postStatuses.areLoading} error={settingsError} />
       </DragDropContext>

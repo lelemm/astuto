@@ -67,6 +67,8 @@ interface ITenantSetting {
   logo_links_to?: TenantSettingLogoLinksTo;
   logo_custom_url?: string;
   custom_css?: string;
+  roadmap_drag_and_drop_enabled?: boolean;
+  roadmap_feedback_content_display?: number;
 }
 
 export default ITenantSetting;

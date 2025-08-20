@@ -39,4 +39,21 @@ feature 'site settings: roadmap', type: :system, js: true do
       expect(page).to have_content(/#{post_status_not_in_roadmap.name}/i)
     end
   end
+
+  it 'lets update and persist roadmap settings' do
+    # Test drag and drop toggle
+    find('#dragAndDropCheckbox').click
+    expect(page).to have_content('All changes saved')
+    
+    # Test feedback content display change
+    select 'Show partial feedback content (30 characters)', from: 'feedbackContentDisplay'
+    expect(page).to have_content('All changes saved')
+    
+    # Reload the page to verify persistence
+    visit site_settings_roadmap_path
+    
+    # Verify the settings are still applied
+    expect(find('#dragAndDropCheckbox')).to be_checked
+    expect(page).to have_select('feedbackContentDisplay', selected: 'Show partial feedback content (30 characters)')
+  end
 end

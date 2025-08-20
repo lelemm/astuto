@@ -1,3 +1,5 @@
+import ITenantSetting from '../ITenantSetting';
+
 interface ITenantJSON {
   id: number;
   site_name: string;
@@ -5,6 +7,7 @@ interface ITenantJSON {
   brand_display_setting: string;
   locale: string;
   custom_domain?: string;
+  tenant_setting?: ITenantSetting;
 }
 
 export default ITenantJSON;

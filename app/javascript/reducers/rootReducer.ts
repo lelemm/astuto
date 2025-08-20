@@ -1,6 +1,7 @@
 import { combineReducers } from 'redux';
 
 import tenantSignUpReducer from './tenantSignUpReducer';
+import tenantReducer from './tenantReducer';
 
 import postsReducer from './postsReducer';
 import boardsReducer from './boardsReducer';
@@ -14,6 +15,7 @@ import moderationReducer from './moderationReducer';
 
 const rootReducer = combineReducers({
   tenantSignUp: tenantSignUpReducer,
+  tenant: tenantReducer,
 
   posts: postsReducer,
   boards: boardsReducer,

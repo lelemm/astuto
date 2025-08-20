@@ -92,6 +92,7 @@ export const updateTenant = ({
       dispatch(tenantUpdateFailure(json.error));
     }
 
+    // Propagate the raw response so callers can react (e.g., reload on success)
     return Promise.resolve(res);
   } catch (e) {
     dispatch(tenantUpdateFailure(e));

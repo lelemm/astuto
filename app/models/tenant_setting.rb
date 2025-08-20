@@ -34,4 +34,10 @@ class TenantSetting < ApplicationRecord
     :never_require_approval,
     :always_require_approval,
   ]
+
+  enum roadmap_feedback_content_display: [
+    :dont_show_content,
+    :show_partial_content,
+    :show_full_content
+  ]
 end

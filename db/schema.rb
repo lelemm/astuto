@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2024_11_30_112415) do
+ActiveRecord::Schema.define(version: 2025_08_19_000000) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -200,6 +200,8 @@ ActiveRecord::Schema.define(version: 2024_11_30_112415) do
     t.integer "logo_links_to", default: 0, null: false
     t.string "logo_custom_url"
     t.boolean "hide_unused_statuses_in_filter_by_status", default: false, null: false
+    t.boolean "roadmap_drag_and_drop_enabled", default: false, null: false
+    t.integer "roadmap_feedback_content_display", default: 0, null: false
     t.index ["tenant_id"], name: "index_tenant_settings_on_tenant_id"
   end
 

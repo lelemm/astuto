@@ -158,6 +158,7 @@ const siteSettingsReducer = (
         ...state,
         general: siteSettingsGeneralReducer(state.general, action),
         appearance: siteSettingsAppearanceReducer(state.general, action),
+        roadmap: siteSettingsRoadmapReducer(state.roadmap, action),
       };
 
     case OAUTH_SUBMIT_START:

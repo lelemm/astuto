@@ -8,6 +8,7 @@ import MultiSelect, { MultiSelectOption } from '../common/MultiSelect';
 import IPostStatus from '../../interfaces/IPostStatus';
 import IPostJSON from '../../interfaces/json/IPost';
 import IBoard from '../../interfaces/IBoard';
+import { UserRoles, USER_ROLE_MODERATOR, USER_ROLE_ADMIN, USER_ROLE_OWNER } from '../../interfaces/IUser';
 import { updatePost } from '../../actions/Post/updatePost';
 
 interface Props {
@@ -15,9 +16,11 @@ interface Props {
   posts: Array<IPostJSON>;
   boards: Array<IBoard>;
   isEmbedded: boolean;
-  authenticityToken: string;
   dragAndDropEnabled?: boolean;
   feedbackContentDisplay: number; // 0: dont_show_content, 1: show_partial_content, 2: show_full_content
+  authenticityToken: string;
+  isLoggedIn: boolean;
+  currentUserRole: UserRoles | null;
   updatePost?: (
     postId: number,
     title: string,
@@ -82,7 +85,13 @@ class Roadmap extends React.Component<Props, State> {
   }
 
   handleDragEnd = (result) => {
-    if (!result.destination || !this.props.updatePost || !this.props.dragAndDropEnabled) return;
+    if (!result.destination || !this.props.updatePost) return;
+    
+    // Check if user has permission to change post status
+    if (!this.canUserChangePostStatus()) {
+      console.warn('User does not have permission to change post status');
+      return;
+    }
     
     const { draggableId, destination } = result;
     const postId = parseInt(draggableId);
@@ -119,8 +128,27 @@ class Roadmap extends React.Component<Props, State> {
     });
   }
 
+  canUserChangePostStatus(): boolean {
+    const { isLoggedIn, currentUserRole, dragAndDropEnabled } = this.props;
+    
+    // First check if drag and drop is globally enabled
+    if (!dragAndDropEnabled) {
+      return false;
+    }
+    
+    // Then check if user is logged in and has appropriate role
+    if (!isLoggedIn || !currentUserRole) {
+      return false;
+    }
+    
+    // Only moderator, admin, and owner can change post status
+    return currentUserRole === USER_ROLE_MODERATOR || 
+           currentUserRole === USER_ROLE_ADMIN || 
+           currentUserRole === USER_ROLE_OWNER;
+  }
+
   render() {
-    const { postStatuses, boards, dragAndDropEnabled = false } = this.props;
+    const { postStatuses, boards, dragAndDropEnabled = false, feedbackContentDisplay } = this.props;
     const { selectedBoards, selectedPostStatuses, localPosts } = this.state;
 
     const boardSelectOptions = boards.filter(board => this.boardsToShow.includes(board.id)).map(board => ({ value: board.id, label: board.name }));
@@ -136,6 +164,9 @@ class Roadmap extends React.Component<Props, State> {
       selectedPostStatuses.some(selectedPostStatus => selectedPostStatus.value === postStatus.id)
     );
 
+    // Determine if drag and drop should be enabled for this user
+    const userDragAndDropEnabled = this.canUserChangePostStatus();
+
     const roadmapContent = (
       <div className="roadmapColumns">
         {filteredPostStatuses.map((postStatus, i) => (
@@ -144,8 +175,8 @@ class Roadmap extends React.Component<Props, State> {
             posts={filteredPosts.filter(post => post.post_status_id === postStatus.id)}
             boards={boards}
             openPostsInNewTab={this.props.isEmbedded}
-            dragAndDropEnabled={dragAndDropEnabled}
-            feedbackContentDisplay={this.props.feedbackContentDisplay}
+            dragAndDropEnabled={userDragAndDropEnabled}
+            feedbackContentDisplay={feedbackContentDisplay}
             key={i}
           />
         ))}
@@ -176,13 +207,9 @@ class Roadmap extends React.Component<Props, State> {
           }
         </div>
 
-        {dragAndDropEnabled ? (
-          <DragDropContext onDragEnd={this.handleDragEnd}>
-            {roadmapContent}
-          </DragDropContext>
-        ) : (
-          roadmapContent
-        )}
+        <DragDropContext onDragEnd={this.handleDragEnd}>
+          {roadmapContent}
+        </DragDropContext>
       </div>
     );
   }
@@ -204,4 +231,4 @@ const mapDispatchToProps = (dispatch) => ({
 export default connect(
   null,
   mapDispatchToProps,
-)(Roadmap); 
+)(Roadmap);
