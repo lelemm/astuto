@@ -286,7 +286,7 @@ class PostP extends React.Component<Props, State> {
                 
               <ReactMarkdown
                 className="postDescription"
-                disallowedTypes={['heading', 'image', 'html']}
+                disallowedTypes={['image', 'html']}
                 unwrapDisallowed
               >
                 {postToShow.description}

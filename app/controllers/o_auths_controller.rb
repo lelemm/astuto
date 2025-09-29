@@ -22,7 +22,11 @@ class OAuthsController < ApplicationController
     # Generate random state + other query params
     tenant_domain = Current.tenant ? Current.tenant_or_raise!.subdomain : "null"
     token_state = "#{params[:reason]}#{TOKEN_STATE_SEPARATOR}#{tenant_domain}#{TOKEN_STATE_SEPARATOR}#{Devise.friendly_token(30)}"
-    cookies[:token_state] = { value: token_state, domain: ".#{request.domain}", httponly: true } unless params[:reason] == 'test'
+    
+    # Extract domain from BASE_URL for cookie domain
+    base_url_host = URI.parse(Rails.application.base_url).host
+    cookie_domain = ".#{base_url_host}"
+    cookies[:token_state] = { value: token_state, domain: cookie_domain, httponly: true } unless params[:reason] == 'test'
     @o_auth.state = token_state
 
     redirect_to @o_auth.authorize_url_with_query_params
@@ -35,7 +39,9 @@ class OAuthsController < ApplicationController
 
     unless reason == "test"
       return unless cookies[:token_state] == params[:state]
-      cookies.delete(:token_state, domain: ".#{request.domain}")
+      base_url_host = URI.parse(Rails.application.base_url).host
+      cookie_domain = ".#{base_url_host}"
+      cookies.delete(:token_state, domain: cookie_domain)
     end
 
     # if it is a default oauth, tenant is not yet set
